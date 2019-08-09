@@ -25,7 +25,7 @@ public class MVCApplication {
     @Profile("dev")
     public Object devObject() {
         return new Object();
-    }
+}
 
     public static void main(String[] args) {
 //        BeanDefinitionLoader
