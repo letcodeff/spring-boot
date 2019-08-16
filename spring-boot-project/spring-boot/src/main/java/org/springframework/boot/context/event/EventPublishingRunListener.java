@@ -73,21 +73,36 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 		return 0;
 	}
 
+	/**
+	 * 首次启动run方法时立即调用。
+	 */
 	@Override
 	public void starting() {
 		this.initialMulticaster.multicastEvent(new ApplicationStartingEvent(this.application, this.args));
 	}
 
+	/**
+	 * 一旦准备好环境，但在ApplicationContext创建环境之前调用
+	 * @param environment the environment
+	 */
 	@Override // ApplicationEnvironmentPreparedEvent
 	public void environmentPrepared(ConfigurableEnvironment environment) {
 		this.initialMulticaster.multicastEvent(new ApplicationEnvironmentPreparedEvent(this.application, this.args, environment));
 	}
 
+	/**
+	 * ApplicationContext在创建和准备之后调用，但在加载源之前调用
+	 * @param context the application context
+	 */
 	@Override // ApplicationContextInitializedEvent
 	public void contextPrepared(ConfigurableApplicationContext context) {
 		this.initialMulticaster.multicastEvent(new ApplicationContextInitializedEvent(this.application, this.args, context));
 	}
 
+	/**
+	 * 在应用程序上下文加载之后但在刷新之前调用
+	 * @param context the application context
+	 */
 	@Override // ApplicationPreparedEvent
 	public void contextLoaded(ConfigurableApplicationContext context) {
 		for (ApplicationListener<?> listener : this.application.getListeners()) {
@@ -99,16 +114,30 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 		this.initialMulticaster.multicastEvent(new ApplicationPreparedEvent(this.application, this.args, context));
 	}
 
+	/**
+	 * 上下文已被刷新，并且应用程序已启动，且CommandLineRunners和ApplicationRunners未被调用
+	 * @param context the application context.
+	 */
 	@Override // ApplicationStartedEvent
 	public void started(ConfigurableApplicationContext context) {
 		context.publishEvent(new ApplicationStartedEvent(this.application, this.args, context));
 	}
 
+	/**
+	 * 在run方法完成之前立即调用，应用上下文已经被刷新,并且CommandLineRunners和ApplicationRunners已经被调用
+	 * @param context the application context.
+	 */
 	@Override
 	public void running(ConfigurableApplicationContext context) {
 		context.publishEvent(new ApplicationReadyEvent(this.application, this.args, context));
 	}
 
+	/**
+	 * 在运行应用程序时发生故障时调用
+	 * @param context the application context or {@code null} if a failure occurred before
+	 * the context was created
+	 * @param exception the failure
+	 */
 	@Override // ApplicationFailedEvent
 	public void failed(ConfigurableApplicationContext context, Throwable exception) {
 		ApplicationFailedEvent event = new ApplicationFailedEvent(this.application, this.args, context, exception);
